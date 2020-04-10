@@ -6,23 +6,21 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
-use Symfony\Component\Process\PhpProcess;
-use Symfony\Component\Process\Process;
-
 use Symfony\Component\Filesystem\Filesystem;
 
 class RebuildCommand extends ContainerAwareCommand
 {
-    protected $users = array();
+    use CommandSetsTrait;
 
-    protected $commandSets = array (
-        array('description' => 'cache:clear', 'command' => 'php app/console cache:clear'),
-        array('description' => 'cache:clear', 'command' => 'php app/console cache:clear --env=prod'),
-        array('description' => 'propel:build', 'command' => 'php app/console propel:build --insert-sql'),
-        array('description' => 'assets:install', 'command' => 'php app/console assets:install'),
-        array('description' => 'cache:warmup', 'command' => 'php app/console cache:warmup'),
-    );
+    protected $users = [];
+
+    protected $commandSets = [
+        ['description' => 'cache:clear', 'command' => 'php app/console cache:clear'],
+        ['description' => 'cache:clear', 'command' => 'php app/console cache:clear --env=prod'],
+        ['description' => 'propel:build', 'command' => 'php app/console propel:build --insert-sql'],
+        ['description' => 'assets:install', 'command' => 'php app/console assets:install'],
+        ['description' => 'cache:warmup', 'command' => 'php app/console cache:warmup'],
+    ];
 
     protected function configure()
     {
@@ -65,26 +63,7 @@ class RebuildCommand extends ContainerAwareCommand
 
     protected function runCommandSets(InputInterface $input, OutputInterface $output)
     {
-        foreach ($this->commandSets as $commandSet)
-        {
-            $output->writeln(sprintf('Running <comment>%s</comment>', $commandSet['description']));
-            if (0 === strpos($commandSet['command'], 'php ')) {
-                $process = new PhpProcess(substr($commandSet['command'], 4));
-            } else {
-                $process = new Process($commandSet['command']);
-            }
-            $process->run(function ($type, $buffer)
-            {
-                if (Process::ERR === $type)
-                {
-                    echo $buffer;
-                }
-                else
-                {
-                    echo $buffer;
-                }
-            });
-        }
+        $this->executeCommandSets($this->commandSets, $output);
     }
 
     protected function addCreateFosUsersToCommandSet()

@@ -5,24 +5,18 @@ namespace C33s\CoreBundle\Command;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-
-use Symfony\Component\Process\PhpProcess;
-use Symfony\Component\Process\Process;
-
 use Symfony\Component\Filesystem\Filesystem;
 
 class CleanCommand extends ContainerAwareCommand
 {
-    protected $commandSetsold = array(
-        array('command' => 'assetic:dump', '--env' => 'prod'),
-    );
+    use CommandSetsTrait;
 
-    protected $commandSets = array(
-        array('description' => 'cache clear prod', 'command' => 'php app/console cache:clear --env=prod'),
-        array('description' => 'cache clear dev', 'command' => 'php app/console cache:clear --env=dev'),
-        array('description' => 'assets install', 'command' => 'php app/console assets:install'),
-        array('description' => 'assetic dump', 'command' => 'php app/console assetic:dump --env=prod'),
-    );
+    protected $commandSets = [
+        ['description' => 'cache clear prod', 'command' => 'php app/console cache:clear --env=prod'],
+        ['description' => 'cache clear dev', 'command' => 'php app/console cache:clear --env=dev'],
+        ['description' => 'assets install', 'command' => 'php app/console assets:install'],
+        ['description' => 'assetic dump', 'command' => 'php app/console assetic:dump --env=prod'],
+    ];
 
     protected function configure()
     {
@@ -34,7 +28,6 @@ class CleanCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-
         $output->writeln('<info>c33s:clean</info>');
 
         $fs = new Filesystem();
@@ -43,25 +36,6 @@ class CleanCommand extends ContainerAwareCommand
         $output->writeln('deleting <info>web/bundles</info> directory');
         $fs->remove($this->getContainer()->getParameter('kernel.root_dir').'/../web/bundles');
 
-        foreach ($this->commandSets as $commandSet)
-        {
-            $output->writeln(sprintf('Running <comment>%s</comment> check.', $commandSet['description']));
-            if (0 === strpos($commandSet['command'], 'php ')) {
-                $process = new PhpProcess(substr($commandSet['command'], 4));
-            } else {
-                $process = new Process($commandSet['command']);
-            }
-            $process->run(function ($type, $buffer)
-            {
-                if (Process::ERR === $type)
-                {
-                    echo $buffer;
-                }
-                else
-                {
-                    echo $buffer;
-                }
-            });
-        }
+        $this->executeCommandSets($this->commandSets, $output);
     }
 }
