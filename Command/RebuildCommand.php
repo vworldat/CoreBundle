@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Symfony\Component\Process\PhpProcess;
 use Symfony\Component\Process\Process;
 
 use Symfony\Component\Filesystem\Filesystem;
@@ -67,7 +68,11 @@ class RebuildCommand extends ContainerAwareCommand
         foreach ($this->commandSets as $commandSet)
         {
             $output->writeln(sprintf('Running <comment>%s</comment>', $commandSet['description']));
-            $process = new Process($commandSet['command']);
+            if (0 === strpos($commandSet['command'], 'php ')) {
+                $process = new PhpProcess(substr($commandSet['command'], 4));
+            } else {
+                $process = new Process($commandSet['command']);
+            }
             $process->run(function ($type, $buffer)
             {
                 if (Process::ERR === $type)

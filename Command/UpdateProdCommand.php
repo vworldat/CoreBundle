@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Symfony\Component\Process\PhpProcess;
 use Symfony\Component\Process\Process;
 
 class UpdateProdCommand extends ContainerAwareCommand
@@ -29,13 +30,16 @@ class UpdateProdCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-
         $output->writeln('<info>c33s:updateprod</info>');
 
         foreach ($this->commandSets as $commandSet)
         {
             $output->writeln(sprintf('Running <comment>%s</comment> check.', $commandSet['description']));
-            $process = new Process($commandSet['command']);
+            if (0 === strpos($commandSet['command'], 'php ')) {
+                $process = new PhpProcess(substr($commandSet['command'], 4));
+            } else {
+                $process = new Process($commandSet['command']);
+            }
             $process->run(function ($type, $buffer)
             {
                 if (Process::ERR === $type)
