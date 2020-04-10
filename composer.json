@@ -51,7 +51,6 @@
         "ptachoire/cssembed": "1.0.2",
         "twbs/bootstrap": "3.2.0",
         "avocode/form-extensions-bundle": "0.1.4",
-        "cedriclombardot/admingenerator-generator-bundle": "^1.1",
         "white-october/pagerfanta-bundle": "^1.0",
         "components/jquery": "^1.11",
         "components/jqueryui": "^1.11",
